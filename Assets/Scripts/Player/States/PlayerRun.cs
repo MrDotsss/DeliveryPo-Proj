@@ -19,6 +19,9 @@ public class PlayerRun : PlayerState
 
     public override void PhysicsUpdate()
     {
+        if (!player.canInput) return;
+
+
         //if nasa slope tayo we move in a slope direction instead
         if (player.IsOnSlope)
         {
@@ -32,6 +35,8 @@ public class PlayerRun : PlayerState
 
     public override void UpdateState()
     {
+        if (!player.canInput) return;
+
         //for effects
         player.cam.BobCam(Vector2.one * 0.1f, 12f); //camera bobbing
         player.cam.TiltCam(player.GetInputDir().x * -6f); //set the tilt depends on the left and right inputs
@@ -67,5 +72,8 @@ public class PlayerRun : PlayerState
         {
             stateMachine.TransitionTo(EPlayerStates.Idle);
         }
+
+        player.ApplyMovement();
+        player.cam.DoLook(player.cam.GetMouseDelta());
     }
 }

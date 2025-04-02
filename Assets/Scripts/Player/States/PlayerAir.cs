@@ -39,12 +39,19 @@ public class PlayerAir : PlayerState
     {
         //meaning we ISMUTHLY move by the air friction (slow movement in the air)
         //using direction and maxspeed
-        player.DoMove(player.GetMoveDirection(), player.walkSpeed, player.airFriction);
         player.UseGravity(true);
+
+        if (!player.canInput) return;
+
+        player.DoMove(player.GetMoveDirection(), player.walkSpeed, player.airFriction);
     }
 
     public override void UpdateState()
     {
+        player.ApplyMovement();
+
+        if (!player.canInput) return;
+
         //for effects
         player.cam.BobCam(Vector2.zero, 8f); //camera bobbing
         player.cam.TiltCam(player.GetInputDir().x * -1.5f); //set the tilt depends on the left and right inputs
@@ -63,5 +70,7 @@ public class PlayerAir : PlayerState
         {
             player.DoVault(player.jumpStrength * 1.3f);
         }
+
+        player.cam.DoLook(player.cam.GetMouseDelta());
     }
 }

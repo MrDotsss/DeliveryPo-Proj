@@ -19,6 +19,9 @@ public class PlayerCrouch : PlayerState
 
     public override void PhysicsUpdate()
     {
+        if (!player.canInput) return;
+
+
         if (player.IsOnSlope)
         {
             player.DoMove(player.GetSlopeDirection(), player.crouchSpeed, player.acceleration);
@@ -31,6 +34,8 @@ public class PlayerCrouch : PlayerState
 
     public override void UpdateState()
     {
+        if (!player.canInput) return;
+
         if (player.GetInputDir().magnitude != 0)
         {
             player.cam.BobCam(Vector2.one * 0.08f, 10f); //camera bobbing
@@ -53,5 +58,8 @@ public class PlayerCrouch : PlayerState
         {
             stateMachine.TransitionTo(EPlayerStates.Idle);
         }
+
+        player.ApplyMovement();
+        player.cam.DoLook(player.cam.GetMouseDelta());
     }
 }

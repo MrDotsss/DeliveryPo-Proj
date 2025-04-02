@@ -5,11 +5,13 @@ using UnityEngine;
 public interface IInteractable
 {
     void Interact();
-    string GetInteractionText { get; } // Returns text like "Talk", "Pick Up", "Deliver"
+    string GetInteractionText();
 }
 
 public interface INPComponent
 {
+    BaseNPC Owner { get; }
+
     void Activate();
 }
 

@@ -11,6 +11,10 @@ public class GameSetting : MonoBehaviour
     public float mouseYSensitivity = 6f;
     [Header("Video")]
     public int maxFPS = 120;
+
+    [Header("GamePlay")]
+    public Color playerColor = Color.blue;
+    public Color npcColor = Color.yellow;
     
 
     private void Awake()

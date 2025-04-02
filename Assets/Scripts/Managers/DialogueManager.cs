@@ -4,6 +4,9 @@ using Ink.Runtime;
 using TMPro;
 using System.Collections.Generic;
 using System;
+using System.Linq;
+using System.Collections;
+using Unity.VisualScripting;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -20,10 +23,15 @@ public class DialogueManager : MonoBehaviour
     private Story story;
 
     [Header("Player")]
-    [SerializeField] private PlayerCam playerCam;
+    private BaseNPC currentNPC;
+    private Player player;
 
-    public event Action<Story> OnDialogueStarted;
-    public event Action<Story> OnDialogueEnded;
+    [Header("Defaults")]
+    [SerializeField] private List<TextAsset> defaultDialogues = new List<TextAsset>();
+   
+    public event Action<Story, BaseNPC> OnDialogueStarted;
+    public event Action<Story, BaseNPC> OnDialogueContinue;
+    public event Action<Story, BaseNPC> OnDialogueEnded;
 
     public bool IsDialogueActive { get; private set; } = false;
 
@@ -37,8 +45,6 @@ public class DialogueManager : MonoBehaviour
 
     private void Start()
     {
-        playerCam = GameObject.FindGameObjectWithTag("PlayerCam").GetComponent<PlayerCam>();
-
         dialoguePanel.SetActive(false);
     }
 
@@ -47,7 +53,8 @@ public class DialogueManager : MonoBehaviour
         if (!IsDialogueActive) return;
 
         // Check if the player pressed the "Submit" button in the new Input System
-        if (InputManager.Instance.input.actions["interact"].WasPressedThisFrame())
+        if (InputManager.Instance.input.actions["interact"].WasPressedThisFrame() ||
+            InputManager.Instance.input.actions["left-action"].WasPressedThisFrame())
         {
             if (story.currentChoices.Count > 0) return; // Prevent skipping choices
             ContinueStory();
@@ -57,25 +64,55 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// Starts the dialogue with a given Ink JSON file.
     /// </summary>
-    public void StartDialogue(TextAsset inkStory, Transform target = null)
+    public void StartDialogue(TextAsset inkStory, BaseNPC targetNPC = null, Transform targetAt = null)
     {
         if (IsDialogueActive) return;
+
+        story = new Story(inkStory.text);
+
+        currentNPC = targetNPC;
+
+        // Sync trust level if the NPC exists
+        if (currentNPC != null)
+        {
+            SyncGameTrustWithInk();
+        }
+
+        RegisterVariableObservers();
 
         IsDialogueActive = true;
         dialoguePanel.SetActive(true);
 
-        if (inkStory != null)
+        if (player == null) player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        player.phone.canInput = false;
+
+        if (currentNPC != null)
         {
-            story = new Story(inkStory.text);
-            OnDialogueStarted?.Invoke(story);
-            SyncGameTrustWithInk(); // Sync trust level
-            RegisterVariableObservers();
+            player.cam.FocusAt(currentNPC.lookAt);
+        }
+        else
+        {
+            player.cam.FocusAt(targetAt);
         }
 
-        playerCam.FocusAt(target);
-        InputManager.Instance.UIMode(true);
-        ContinueStory();
+        InputManager.Instance.SetCursor(false, false);
+        PlayerInventory.Instance.CloseInventory();
+
+        OnDialogueStarted?.Invoke(story, currentNPC);
+
+        StartCoroutine(DelayedContinueStory());
     }
+
+
+    private IEnumerator DelayedContinueStory()
+    {
+        yield return null; // Wait for a frame to ensure the story is set up
+        if (story != null && story.canContinue)
+        {
+            ContinueStory();
+        }
+    }
+
 
     /// <summary>
     /// Continues the Ink story and updates the dialogue text.
@@ -88,8 +125,19 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
-        dialogueText.text = story.Continue();
+        dialogueText.text = FormatLine(story.Continue());
+        OnDialogueContinue?.Invoke(story, currentNPC);
         DisplayChoices();
+    }
+
+    private string FormatLine(string line)
+    {
+        string playerHex = GameSetting.Instance.playerColor.ToHexString();
+        string npcHex = GameSetting.Instance.npcColor.ToHexString();
+
+        return line.Replace("alias: ", $"<color=#{npcHex}>{currentNPC.aliasName}:</color> ")
+                .Replace("npc: ", $"<color=#{npcHex}>{currentNPC.npcName}:</color> ") // Gold color for NPC
+                .Replace("you: ", $"<color=#{playerHex}>Marimar:</color> "); // Gold color for Player
     }
 
     /// <summary>
@@ -101,16 +149,15 @@ public class DialogueManager : MonoBehaviour
 
         if (story.currentChoices.Count == 0)
         {
-            InputManager.Instance.UIMode(true);
             return;
         }
 
-        InputManager.Instance.UIMode(false);
 
         for (int i = 0; i < story.currentChoices.Count; i++)
         {
             Button choiceButton = Instantiate(choiceButtonPrefab, choiceContainer);
-            choiceButton.GetComponentInChildren<TextMeshProUGUI>().text = story.currentChoices[i].text;
+
+            choiceButton.GetComponentInChildren<TextMeshProUGUI>().text = FormatLine(story.currentChoices[i].text);
 
             int choiceIndex = i;
             choiceButton.onClick.AddListener(() => MakeChoice(choiceIndex));
@@ -152,41 +199,56 @@ public class DialogueManager : MonoBehaviour
     {
         IsDialogueActive = false;
         dialoguePanel.SetActive(false);
-        OnDialogueEnded?.Invoke(story);
         UnregisterVariableObservers();
-        playerCam.StopFocus();
-        InputManager.Instance.PlayerMode();
-    }
+        player.cam.StopFocus();
+        player.phone.canInput = true;
+        InputManager.Instance.SetCursor(true, true);
+        OnDialogueEnded?.Invoke(story, currentNPC);
+        currentNPC = null;
 
+        Debug.Log($"Dialogue ended with grade: {NPCManager.Instance.GetTrustGrade()}");
+    }
     /// <summary>
-    /// Syncs the trust level between Unity and Ink.
+    /// Syncs the trust level between Unity and Ink safely.
     /// </summary>
     private void SyncGameTrustWithInk()
     {
-        if (story == null) return;
+        if (currentNPC == null) return;
 
-        int unityTrust = GameStatusManager.Instance.PlayerTrust;
-        story.variablesState["trustLevel"] = unityTrust;
+        string trustVariable = "trustLvl"; // Ink variable name
 
-        Debug.Log($"[Sync] Unity -> Ink | Trust Level: {unityTrust}");
+        if (story.variablesState.Contains(trustVariable))
+        {
+            // Set the Ink trust level to the NPC's trust level
+            story.variablesState[trustVariable] = currentNPC.TrustLevel;
+        }
     }
 
+
     /// <summary>
-    /// Registers observers for Ink variables.
+    /// Registers observers for Ink variables safely.
     /// </summary>
     private void RegisterVariableObservers()
     {
         if (story == null) return;
 
-        story.ObserveVariable("trustLevel", (string varName, object newValue) =>
+        // Check if the Ink file contains the "trustLvl" variable before observing
+        if (story.variablesState.Contains("trustLvl"))
         {
-            int newTrustValue = (int)newValue;
-            if (newTrustValue != GameStatusManager.Instance.PlayerTrust)
+            story.ObserveVariable("trustLvl", (string varName, object newValue) =>
             {
-                Debug.Log($"[Ink Variable Changed] {varName} -> {newValue}");
-                GameStatusManager.Instance.DefineTrust(newTrustValue);
-            }
-        });
+                float newTrustValue = (float)newValue;
+                NPCManager.Instance.UpdateTrustLevel(currentNPC.npcName, newTrustValue);
+            });
+        }
+    }
+
+    public void SetCustomVariable(string varName, object value)
+    {
+        if (story.variablesState.Contains(varName))
+        {
+            story.variablesState[varName] = value;
+        }
     }
 
     /// <summary>
@@ -196,5 +258,15 @@ public class DialogueManager : MonoBehaviour
     {
         if (story == null) return;
         story.RemoveVariableObserver(null);
+    }
+
+    public TextAsset GetDefaultDialogue(string fileName)
+    {
+        foreach (TextAsset textAsset in defaultDialogues)
+        {
+            if (textAsset.name == fileName) return textAsset;
+        }
+
+        return defaultDialogues[0];
     }
 }

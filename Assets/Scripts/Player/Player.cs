@@ -13,8 +13,10 @@ public class Player : MonoBehaviour
     [Header("References")]
     [SerializeField] private CharacterController controller;
     public PlayerCam cam;
+    public Phone phone;
+    public Transform modelPoint;
     [Space]
-    [SerializeField] private Transform orientation;
+    public Transform orientation;
     [SerializeField] private Transform neck;
     [Space]
     [Header("Masks")]
@@ -93,10 +95,6 @@ public class Player : MonoBehaviour
             float angle = Vector3.Angle(Vector3.up, groundHit.normal);
             IsOnSlope = angle < maxSlopeAngle && angle != 0;
         }
-
-        if (canInput)
-            controller.Move(velocity * Time.deltaTime);
-
     }
 
     #region Setters and Getters
@@ -114,6 +112,13 @@ public class Player : MonoBehaviour
         {
             velocity.y = 0;
         }
+    }
+
+    public void ApplyMovement()
+    {
+        if (DialogueManager.Instance.IsDialogueActive) return;
+
+        controller.Move(velocity * Time.deltaTime);
     }
 
     public void DefineVelocity(float x, float y, float z)

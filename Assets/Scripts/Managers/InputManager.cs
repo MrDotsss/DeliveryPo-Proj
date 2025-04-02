@@ -4,14 +4,11 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-
     public static InputManager Instance { get; private set; }
 
     public PlayerInput input;
     [Header("Visual")]
     [SerializeField] private GameObject cursorUi;
-
-    private InputActionAsset action;
 
     public bool isUIMode = false;
 
@@ -34,31 +31,20 @@ public class InputManager : MonoBehaviour
             return;
         }
 
-        action = input.actions;
-
-        if (isUIMode) UIMode();
+        if (isUIMode) SetCursor(false);
     }
 
-    public void UIMode(bool cursorLocked = false)
+    public void SetCursor(bool cursorLocked = false, bool uiVisible = false)
     {
-        action.FindActionMap("Player")?.Disable();
-        action.FindActionMap("UI")?.Enable();
-
         Cursor.lockState = cursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !cursorLocked;
-
-        cursorUi.SetActive(false);
-
+        cursorUi.SetActive(uiVisible);
     }
 
-    public void PlayerMode(bool cursorLocked = true)
+    public void PlayerCanInput(bool canInput)
     {
-        action.FindActionMap("Player")?.Enable();
-        action.FindActionMap("UI")?.Disable();
+        Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
-        Cursor.lockState = cursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
-        Cursor.visible = !cursorLocked;
-
-        cursorUi.SetActive(true);
+        if (player != null) player.canInput = canInput;
     }
 }

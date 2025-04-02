@@ -5,7 +5,7 @@ public class PlayerAim : MonoBehaviour
 {
     [Header("Raycast Settings")]
     public float reachDistance = 3f; // How far the player can interact
-    public LayerMask interactableLayer; // Assign a layer for interactables
+    public LayerMask layerMask;
 
     [Header("UI Elements")]
     public TextMeshProUGUI interactionText; // UI Text for interaction display
@@ -30,7 +30,7 @@ public class PlayerAim : MonoBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, reachDistance, interactableLayer))
+        if (Physics.Raycast(ray, out hit, reachDistance, layerMask) && Cursor.lockState == CursorLockMode.Locked)
         {
             // Check if the object implements IInteractable
             IInteractable interactable = hit.collider.GetComponent<IInteractable>();
@@ -40,7 +40,7 @@ public class PlayerAim : MonoBehaviour
                 if (currentInteractable != interactable)
                 {
                     currentInteractable = interactable;
-                    ShowInteraction(interactable.GetInteractionText);
+                    ShowInteraction(interactable.GetInteractionText());
                 }
 
                 if (InputManager.Instance.input.actions["interact"].WasPressedThisFrame())
@@ -54,6 +54,8 @@ public class PlayerAim : MonoBehaviour
             HideInteraction();
             currentInteractable = null;
         }
+
+
     }
 
     private void ShowInteraction(string interactionType)

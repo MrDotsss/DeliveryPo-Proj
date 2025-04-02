@@ -14,9 +14,9 @@ TagManager:
   - UI
   - Player
   - NPC
-  - 
-  - 
-  - 
+  - Item
+  - Hand
+  - Capturable
   - 
   - 
   - 

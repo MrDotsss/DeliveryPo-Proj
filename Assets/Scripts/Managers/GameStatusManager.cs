@@ -11,8 +11,11 @@ public class GameStatusManager : MonoBehaviour
     public int evidencesCollected = 0;
 
     [Header("Trust & Suspicion")]
-    private int _playerTrust = 0;
-    public int PlayerTrust
+    private float _playerTrust = 0;
+
+    public bool IsPaused { get; private set; }
+
+    public float PlayerTrust
     {
         get => _playerTrust;
         private set
@@ -23,7 +26,7 @@ public class GameStatusManager : MonoBehaviour
         }
     }
 
-    public event Action<int> OnTrustLevelChanged; // Event for UI or reactions
+    public event Action<float> OnTrustLevelChanged; // Event for UI or reactions
 
     [Header("Player Status")]
     public PlayerStatus playerState = PlayerStatus.Normal;
@@ -42,7 +45,7 @@ public class GameStatusManager : MonoBehaviour
     }
 
     // Update trust level (with clamping)
-    public void DefineTrust(int amount)
+    public void DefineTrust(float amount)
     {
         PlayerTrust = amount; // Clamping now handled in setter
     }
@@ -52,6 +55,18 @@ public class GameStatusManager : MonoBehaviour
     {
         currentDay++;
         Debug.Log("Day " + currentDay);
+    }
+
+    public void PauseGame()
+    {
+        IsPaused = true;
+        Time.timeScale = 0;
+    }
+
+    public void ResumeGame()
+    {
+        IsPaused = false;
+        Time.timeScale = 1;
     }
 }
 

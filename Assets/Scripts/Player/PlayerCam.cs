@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerCam : MonoBehaviour
 {
-    [SerializeField] private Camera mainCam;
+    [SerializeField] private Camera cam;
     [Space]
     [SerializeField] private Transform orientation;
     [SerializeField] private Transform head;
@@ -18,6 +18,8 @@ public class PlayerCam : MonoBehaviour
     private Quaternion originalRotation;
     private Coroutine focusCoroutine;
 
+    public bool canInput = true;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -26,19 +28,16 @@ public class PlayerCam : MonoBehaviour
         originalHeadPosition = head.localPosition;
     }
 
-    private void Update()
+    public void DoLook(Vector2 mouseDelta)
     {
-        if (DialogueManager.Instance.IsDialogueActive) return;
+        if (focusTarget != null || DialogueManager.Instance.IsDialogueActive || !canInput) return;
 
-        if (focusTarget == null) // If no focus target, allow manual rotation
-        {
-            rotationAxis.y += GetMouseDelta().x;
-            rotationAxis.x -= GetMouseDelta().y;
-            rotationAxis.x = Mathf.Clamp(rotationAxis.x, -90, 90);
+        rotationAxis.y += mouseDelta.x;
+        rotationAxis.x -= mouseDelta.y;
+        rotationAxis.x = Mathf.Clamp(rotationAxis.x, -90, 90);
 
-            transform.rotation = Quaternion.Euler(rotationAxis.x, rotationAxis.y, 0);
-            orientation.rotation = Quaternion.Euler(0, rotationAxis.y, 0);
-        }
+        transform.rotation = Quaternion.Euler(rotationAxis.x, rotationAxis.y, 0);
+        orientation.rotation = Quaternion.Euler(0, rotationAxis.y, 0);
     }
 
     #region Methods
@@ -51,7 +50,7 @@ public class PlayerCam : MonoBehaviour
 
     public void ZoomCam(float amount, float lerp = 32f)
     {
-        mainCam.fieldOfView = Mathf.MoveTowards(mainCam.fieldOfView, amount, lerp * Time.deltaTime);
+        cam.fieldOfView = Mathf.MoveTowards(cam.fieldOfView, amount, lerp * Time.deltaTime);
     }
 
     public void TiltCam(float angle, float lerp = 4f)

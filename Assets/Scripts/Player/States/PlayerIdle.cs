@@ -18,11 +18,15 @@ public class PlayerIdle : PlayerState
 
     public override void PhysicsUpdate()
     {
+        if (!player.canInput) return;
+
         player.DoMove(Vector3.zero, 0, player.friction);
     }
 
     public override void UpdateState()
     {
+        if (!player.canInput) return;
+
         //for effects
         player.cam.BobCam(new Vector2(0.001f, 0.025f), 4f); //reset camera bobbing
         player.cam.TiltCam(0); //reset tilt
@@ -44,5 +48,8 @@ public class PlayerIdle : PlayerState
         {
             stateMachine.TransitionTo(EPlayerStates.Walk);
         }
+
+        player.ApplyMovement();
+        player.cam.DoLook(player.cam.GetMouseDelta());
     }
 }

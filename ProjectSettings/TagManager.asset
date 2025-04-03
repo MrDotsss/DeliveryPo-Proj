@@ -4,7 +4,7 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - NPC
+  - PlayerCam
   layers:
   - Default
   - TransparentFX
@@ -12,12 +12,12 @@ TagManager:
   - Ground
   - Water
   - UI
-  - Wall
-  - Ledge
-  - NPCHurtbox
-  - PlayerHurtbox
   - Player
   - NPC
+  - Item
+  - Hand
+  - Capturable
+  - 
   - 
   - 
   - 

@@ -206,4 +206,9 @@ public class PlayerInventory : MonoBehaviour
 
         return null;
     }
+
+    public void ClearInventory()
+    {
+        inventory.Clear();
+    }
 }

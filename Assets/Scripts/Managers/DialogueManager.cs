@@ -28,7 +28,7 @@ public class DialogueManager : MonoBehaviour
 
     [Header("Defaults")]
     [SerializeField] private List<TextAsset> defaultDialogues = new List<TextAsset>();
-   
+
     public event Action<Story, BaseNPC> OnDialogueStarted;
     public event Action<Story, BaseNPC> OnDialogueContinue;
     public event Action<Story, BaseNPC> OnDialogueEnded;
@@ -36,6 +36,8 @@ public class DialogueManager : MonoBehaviour
     public bool IsDialogueActive { get; private set; } = false;
 
     private List<Button> choiceButtons = new List<Button>();
+
+    public bool canInput = true;
 
     private void Awake()
     {
@@ -56,7 +58,7 @@ public class DialogueManager : MonoBehaviour
         if (InputManager.Instance.input.actions["interact"].WasPressedThisFrame() ||
             InputManager.Instance.input.actions["left-action"].WasPressedThisFrame())
         {
-            if (story.currentChoices.Count > 0) return; // Prevent skipping choices
+            if (story.currentChoices.Count > 0 || !canInput) return; // Prevent skipping choices
             ContinueStory();
         }
     }
@@ -126,6 +128,7 @@ public class DialogueManager : MonoBehaviour
         }
 
         dialogueText.text = FormatLine(story.Continue());
+
         OnDialogueContinue?.Invoke(story, currentNPC);
         DisplayChoices();
     }
@@ -135,9 +138,15 @@ public class DialogueManager : MonoBehaviour
         string playerHex = GameSetting.Instance.playerColor.ToHexString();
         string npcHex = GameSetting.Instance.npcColor.ToHexString();
 
-        return line.Replace("alias: ", $"<color=#{npcHex}>{currentNPC.aliasName}:</color> ")
-                .Replace("npc: ", $"<color=#{npcHex}>{currentNPC.npcName}:</color> ") // Gold color for NPC
-                .Replace("you: ", $"<color=#{playerHex}>Marimar:</color> "); // Gold color for Player
+        string result = line.Replace("you: ", $"<color=#{playerHex}>Marimar:</color> ");
+
+        if (currentNPC != null)
+        {
+            return result.Replace("alias: ", $"<color=#{npcHex}>{currentNPC.aliasName}:</color> ")
+                .Replace("npc: ", $"<color=#{npcHex}>{currentNPC.npcName}:</color> ");
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -205,6 +214,7 @@ public class DialogueManager : MonoBehaviour
         InputManager.Instance.SetCursor(true, true);
         OnDialogueEnded?.Invoke(story, currentNPC);
         currentNPC = null;
+        canInput = true;
 
         Debug.Log($"Dialogue ended with grade: {NPCManager.Instance.GetTrustGrade()}");
     }

@@ -40,11 +40,4 @@ public class InputManager : MonoBehaviour
         Cursor.visible = !cursorLocked;
         cursorUi.SetActive(uiVisible);
     }
-
-    public void PlayerCanInput(bool canInput)
-    {
-        Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-
-        if (player != null) player.canInput = canInput;
-    }
 }

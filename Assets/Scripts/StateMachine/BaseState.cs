@@ -16,6 +16,11 @@ public abstract class BaseState<EState> : MonoBehaviour where EState : System.En
 
     public abstract void PhysicsUpdate();
 
+    public virtual void LateUpdateState()
+    {
+
+    }
+
     public abstract void UpdateState();
 
     public abstract void Exit();

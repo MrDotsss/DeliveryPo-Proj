@@ -116,7 +116,7 @@ public class Player : MonoBehaviour
 
     public void ApplyMovement()
     {
-        if (DialogueManager.Instance.IsDialogueActive) return;
+        if (DialogueManager.Instance.IsDialogueActive || !canInput) return;
 
         controller.Move(velocity * Time.deltaTime);
     }
@@ -131,6 +131,11 @@ public class Player : MonoBehaviour
         currentStamina += rate;
 
         currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
+    }
+
+    public void SetController(bool enabled)
+    {
+        controller.enabled = enabled;
     }
     #endregion
 
@@ -200,7 +205,7 @@ public class Player : MonoBehaviour
         velocity = Vector3.up * force;
     }
 
-    public void DoCrouch(bool crouch = true, float lerpTime = 8f)
+    public void DoCrouch(bool crouch = true)
     {
         //we use 2 colliders instead of scaling the player
         //since may mga child kasi na pwedeng maapektuhan sa scale 2 colliders is the solution
@@ -209,7 +214,7 @@ public class Player : MonoBehaviour
         //then para di parin mukhang nakatayo si player
         if (crouch)
         {
-            neck.localPosition = Vector3.zero;
+            neck.localPosition = Vector3.down * 0.15f;
         }
         else
         {

@@ -7,19 +7,29 @@ public class PlayerHand : MonoBehaviour
     [SerializeField] private Transform neck;
     private GameObject currentObject;
     private InventoryItem currentItem;
+    [Header("Collision")]
+    public float checkDistance = 0.5f;
+    public Vector3 halfExtents = Vector3.one * 0.1f;
 
-    private RaycastHit wallHit;
+    public Camera cam;
 
     private void Start()
     {
         PlayerInventory.Instance.OnEquipItem += EquipInstance;
         PlayerInventory.Instance.OnDropItem += DropInstance;
+
+        cam = Camera.main;
     }
 
     private void OnDestroy()
     {
         PlayerInventory.Instance.OnEquipItem -= EquipInstance;
         PlayerInventory.Instance.OnDropItem -= DropInstance;
+    }
+
+    private void Update()
+    {
+        PushBack();
     }
 
     private void EquipInstance(InventoryItem item)
@@ -61,5 +71,22 @@ public class PlayerHand : MonoBehaviour
         pickable.inventoryItem = item;
     }
 
+    private void PushBack()
+    {
+        bool collided = Physics.BoxCast(cam.transform.position, halfExtents, cam.transform.forward, transform.rotation, checkDistance);
 
+        float targetZ = collided ? 0.5f : 0.8f;
+
+        Vector3 localPos = transform.localPosition;
+
+        localPos.z = Mathf.MoveTowards(localPos.z, targetZ, Time.deltaTime);
+        transform.localPosition = localPos;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.matrix = Matrix4x4.TRS(cam.transform.position, cam.transform.rotation, Vector3.one);
+        Gizmos.DrawWireCube(Vector3.forward * checkDistance, halfExtents * 2);
+    }
 }

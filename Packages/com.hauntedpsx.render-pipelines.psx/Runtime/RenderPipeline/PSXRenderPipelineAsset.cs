@@ -1,16 +1,13 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 namespace HauntedPSX.RenderPipelines.PSX.Runtime
 {
     public partial class PSXRenderPipelineAsset : RenderPipelineAsset
     {
-        #if UNITY_2022_3_OR_NEWER
-        // Shader stripping changed in Core RP 14.0.8 which used by Unity 2022 LTS and later
-        public override string renderPipelineShaderTag => PSXStringConstants.s_GlobalRenderPipelineStr;
-        #endif
-
         PSXRenderPipelineAsset()
         {
         }
@@ -39,7 +36,7 @@ namespace HauntedPSX.RenderPipelines.PSX.Runtime
                 base.OnValidate();
         }
 
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
         private Shader _defaultShader = null;
         public override Shader defaultShader
         {
@@ -80,11 +77,11 @@ namespace HauntedPSX.RenderPipelines.PSX.Runtime
         {
             get { return null; } // TODO
         }
-#endif
+    #endif
 
         [SerializeField]
         public PSXRenderPipelineResources renderPipelineResources;
-
+        
         // TODO: Currently the SRP Batcher is forced off due to a D3D11 swap chain crash in HPSXRP.
         // Expose this option to users once the SRP Batcher stabilizes / once the engine is fixed.
         // 

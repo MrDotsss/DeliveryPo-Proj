@@ -26,6 +26,10 @@ public abstract class StateMachine<EState> : MonoBehaviour where EState : System
         TransitionTo(initialState);
     }
 
+    private void LateUpdate()
+    {
+        currentState?.LateUpdateState();
+    }
     private void Update()
     {
         currentState?.UpdateState();

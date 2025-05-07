@@ -25,30 +25,26 @@ public class Phone : MonoBehaviour
     private InventoryItem previousEquiped;
 
     public bool canInput = true;
+    public bool isOpened = false;
 
     private void Start()
     {
-        model.SetActive(false);
+        model.SetActive(isOpened);
 
         startPhonePos = transform.localPosition;
 
         PlayerInventory.Instance.OnEquipItem += ((invention) =>
         {
-            model.SetActive(false);
+            model.SetActive(!canInput);
             InputManager.Instance.SetCursor(true, true);
-        });
-
-        DialogueManager.Instance.OnDialogueStarted += ((str, npc) =>
-        {
-            currentPressed = "home";
-            previousEquiped = null;
-            ClosePhone();
-            InputManager.Instance.SetCursor(false, false);
         });
     }
 
     private void Update()
     {
+        if (!canInput) return;
+
+
         if (InputManager.Instance.input.actions["phone"].WasPressedThisFrame() && !DialogueManager.Instance.IsDialogueActive)
         {
             if (model.activeSelf)
@@ -78,6 +74,8 @@ public class Phone : MonoBehaviour
             }
         }
 
+        if (DialogueManager.Instance.IsDialogueActive) DoCamAim(false);
+
     }
 
     public void OpenPhone()
@@ -104,11 +102,19 @@ public class Phone : MonoBehaviour
 
     public void ToggleFlashlight()
     {
+        if (!canInput) return;
+
         flashLight.SetActive(!flashLight.activeSelf);
     }
 
     public EPhoneStates GetState()
     {
+        if (DialogueManager.Instance.IsDialogueActive)
+        {
+            currentPressed = "home";
+            return EPhoneStates.Home;
+        }
+
         switch (currentPressed)
         {
             case "home":
@@ -120,7 +126,8 @@ public class Phone : MonoBehaviour
             case "todo":
                 return EPhoneStates.Todo;
             case "camera":
-                return EPhoneStates.Camera;
+                if (canInput) return EPhoneStates.Camera;
+                else return EPhoneStates.Home;
             case "gallery":
                 return EPhoneStates.Gallery;
             case "phone":

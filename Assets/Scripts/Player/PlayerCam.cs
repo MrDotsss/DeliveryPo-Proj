@@ -7,7 +7,7 @@ public class PlayerCam : MonoBehaviour
     [SerializeField] private Camera cam;
     [Space]
     [SerializeField] private Transform orientation;
-    [SerializeField] private Transform head;
+    public Transform head;
 
     private Vector2 rotationAxis;
     private float bobTime = 0.0f;
@@ -28,15 +28,16 @@ public class PlayerCam : MonoBehaviour
         originalHeadPosition = head.localPosition;
     }
 
-    public void DoLook(Vector2 mouseDelta)
+    public void DoLook(Vector2 mouseDelta, float hLimit = 0, float vLimit = 90)
     {
         if (focusTarget != null || DialogueManager.Instance.IsDialogueActive || !canInput) return;
 
         rotationAxis.y += mouseDelta.x;
         rotationAxis.x -= mouseDelta.y;
-        rotationAxis.x = Mathf.Clamp(rotationAxis.x, -90, 90);
+        rotationAxis.x = Mathf.Clamp(rotationAxis.x, -vLimit, vLimit);
+        if(hLimit > 0) rotationAxis.y = Mathf.Clamp(rotationAxis.y, -hLimit, hLimit);
 
-        transform.rotation = Quaternion.Euler(rotationAxis.x, rotationAxis.y, 0);
+        transform.localRotation = Quaternion.Euler(rotationAxis.x, rotationAxis.y, 0);
         orientation.rotation = Quaternion.Euler(0, rotationAxis.y, 0);
     }
 

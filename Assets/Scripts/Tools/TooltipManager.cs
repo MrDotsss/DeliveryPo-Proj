@@ -35,6 +35,8 @@ public class TooltipManager : MonoBehaviour
 
     private void Update()
     {
+        if (tooltipPanel == null) return;
+
         if (tooltipPanel.activeSelf && !optionsPanel.activeSelf)
         {
             // Move tooltip with the mouse

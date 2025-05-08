@@ -36,9 +36,12 @@ public class NoEyes : BaseNPC
         {
             DialogueManager.Instance.canInput = false;
             DialogueManager.Instance.StartDialogue(DialogueManager.Instance.GetDefaultDialogue("Caught"));
+            PlayerInventory.Instance.UnequipItem();
 
             controller.enabled = false;
             player.canInput = false;
+            player.phone.canInput = false;
+            player.phone.ClosePhone();
 
             transform.SetParent(player.cam.head);
             transform.localPosition = new Vector3(0, -0.5f, 0.5f);

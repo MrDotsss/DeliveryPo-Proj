@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerHand : MonoBehaviour
@@ -29,7 +30,8 @@ public class PlayerHand : MonoBehaviour
 
     private void Update()
     {
-        PushBack();
+        //PushBack();
+
     }
 
     private void EquipInstance(InventoryItem item)
@@ -40,12 +42,8 @@ public class PlayerHand : MonoBehaviour
 
         currentItem = item;
         currentObject = Instantiate(item.itemData.modelPrefab, transform);
+        currentObject.GetComponent<MeshRenderer>().material.renderQueue = 4000;
         currentObject.layer = LayerMask.NameToLayer("Hand");
-
-        foreach (Transform child in currentObject.GetComponentInChildren<Transform>())
-        {
-            child.gameObject.layer = LayerMask.NameToLayer("Hand");
-        }
     }
 
     private void DropInstance(InventoryItem item)
@@ -57,6 +55,7 @@ public class PlayerHand : MonoBehaviour
         }
 
         GameObject toDrop = Instantiate(item.itemData.modelPrefab);
+
         toDrop.transform.SetPositionAndRotation(transform.position, Quaternion.identity);
         Rigidbody rb = toDrop.AddComponent<Rigidbody>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;

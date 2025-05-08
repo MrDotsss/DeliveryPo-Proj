@@ -87,6 +87,7 @@ public class DialogueManager : MonoBehaviour
 
         if (player == null) player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         player.phone.canInput = false;
+        player.phone.ClosePhone();
 
         if (currentNPC != null)
         {

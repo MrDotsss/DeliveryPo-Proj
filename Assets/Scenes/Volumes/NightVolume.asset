@@ -159,7 +159,7 @@ MonoBehaviour:
     m_Value: 1
   color:
     m_OverrideState: 1
-    m_Value: {r: 0.13207549, g: 0.1217929, b: 0.11899254, a: 1}
+    m_Value: {r: 0.21787113, g: 0.28315333, b: 0.3018868, a: 1}
   precisionAlpha:
     m_OverrideState: 1
     m_Value: 1
@@ -175,7 +175,7 @@ MonoBehaviour:
     m_Value: 5
   distanceMax:
     m_OverrideState: 1
-    m_Value: 80
+    m_Value: 100
   fogFalloffCurve:
     m_OverrideState: 1
     m_Value: -0.1

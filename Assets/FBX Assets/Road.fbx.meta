@@ -3,7 +3,12 @@ guid: edd363d993231ed408d98591175700bf
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: concrete road texture
+    second: {fileID: 2800000, guid: 2b21c5baaa1938f4ba350c229483c02a, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

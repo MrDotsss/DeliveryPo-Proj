@@ -3,7 +3,12 @@ guid: 83b5e7dc52c0c8e4a8d28700a8485b95
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yero texture
+    second: {fileID: 2800000, guid: 7a8707a90b95c1f42b5a0cdb4144271a, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

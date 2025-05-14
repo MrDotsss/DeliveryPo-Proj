@@ -3,26 +3,20 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags:
-<<<<<<< Updated upstream
-  - NPC
-=======
-  - PlayerCam
-  - Ground
->>>>>>> Stashed changes
+  tags: []
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - 
   - Water
   - UI
-  - Wall
-  - Ledge
-  - NPCHurtbox
-  - PlayerHurtbox
-  - Player
-  - NPC
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
   - 
   - 
   - 

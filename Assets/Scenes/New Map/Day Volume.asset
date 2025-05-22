@@ -62,7 +62,7 @@ MonoBehaviour:
     m_Value: 1
   scanlineSharpness:
     m_OverrideState: 1
-    m_Value: 0.132
+    m_Value: 0
   imageSharpness:
     m_OverrideState: 1
     m_Value: 1
@@ -74,7 +74,7 @@ MonoBehaviour:
     m_Value: 1
   noiseIntensity:
     m_OverrideState: 1
-    m_Value: 0.015
+    m_Value: 0.068
   noiseSaturation:
     m_OverrideState: 1
     m_Value: 1
@@ -86,13 +86,13 @@ MonoBehaviour:
     m_Value: 0.485
   barrelDistortionX:
     m_OverrideState: 1
-    m_Value: 0.05
+    m_Value: 0.605
   barrelDistortionY:
     m_OverrideState: 1
-    m_Value: 0.08
+    m_Value: 0
   vignette:
     m_OverrideState: 1
-    m_Value: 0.5
+    m_Value: 0.223
 --- !u!114 &-6435725999714349139
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -200,7 +200,7 @@ MonoBehaviour:
     m_Value: 1
   color:
     m_OverrideState: 1
-    m_Value: {r: 0.55291027, g: 0.6618914, b: 0.6698113, a: 1}
+    m_Value: {r: 0.12534711, g: 0.12534711, b: 0.13207549, a: 1}
   precisionAlpha:
     m_OverrideState: 1
     m_Value: 1
@@ -213,16 +213,16 @@ MonoBehaviour:
     m_Value: 1
   distanceMin:
     m_OverrideState: 1
-    m_Value: 50
+    m_Value: 17.99
   distanceMax:
     m_OverrideState: 1
     m_Value: 150
   fogFalloffCurve:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: -0.37
   heightFalloffEnabled:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
   heightFalloffMirrored:
     m_OverrideState: 1
     m_Value: 0
@@ -250,13 +250,13 @@ MonoBehaviour:
     m_Value: 0
   isAdditionalLayerEnabled:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
   fogFalloffModeLayer1:
     m_OverrideState: 1
     m_Value: 0
   colorLayer1:
     m_OverrideState: 1
-    m_Value: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    m_Value: {r: 0.23018861, g: 0.23018861, b: 0.23018861, a: 1}
   distanceMinLayer1:
     m_OverrideState: 1
     m_Value: 0
@@ -265,7 +265,7 @@ MonoBehaviour:
     m_Value: 100
   fogFalloffCurveLayer1:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: -0.25
   heightFalloffEnabledLayer1:
     m_OverrideState: 1
     m_Value: 0

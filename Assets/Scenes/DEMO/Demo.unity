@@ -232,7 +232,7 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: 
+  m_DefaultActionMap: ControlMap
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!114 &338569278
@@ -279,6 +279,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1391538847}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &834773222
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 834773223}
+  - component: {fileID: 834773224}
+  m_Layer: 0
+  m_Name: DialogueManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &834773223
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 834773222}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1391538847}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &834773224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 834773222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b10d7f771b490c54593e0d7ca0820d33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultDialogues:
+  - {fileID: 4900000, guid: 122331270aa27154eb79450450eee51c, type: 3}
+  - {fileID: 4900000, guid: a6afba59543c3a547a96da15f00e5cbf, type: 3}
+  - {fileID: 4900000, guid: 72a2d3d081129b6498e1dc251fed4833, type: 3}
+  - {fileID: 4900000, guid: 31fc8be43ff0f49478636ffc1f83a40f, type: 3}
 --- !u!1 &906741755
 GameObject:
   m_ObjectHideFlags: 0
@@ -768,6 +817,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1257155056}
+  - component: {fileID: 1257155057}
   m_Layer: 0
   m_Name: InventoryManager
   m_TagString: Untagged
@@ -790,6 +840,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1391538847}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1257155057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257155055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c00127f8229c5c748b75d89b0861df12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parcels: []
+  inventory: []
 --- !u!1 &1391538846
 GameObject:
   m_ObjectHideFlags: 0
@@ -822,6 +886,8 @@ Transform:
   m_Children:
   - {fileID: 338569276}
   - {fileID: 1257155056}
+  - {fileID: 834773223}
+  - {fileID: 1563707310}
   - {fileID: 454142833}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -837,6 +903,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 606c3a41e9a21a14cb5c491254884870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1563707309
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1563707310}
+  - component: {fileID: 1563707311}
+  m_Layer: 0
+  m_Name: QuestManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1563707310
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1563707309}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1391538847}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1563707311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1563707309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf9def770e2e4c43a5a321f647af853, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  quests: []
 --- !u!43 &1588179265
 Mesh:
   m_ObjectHideFlags: 0

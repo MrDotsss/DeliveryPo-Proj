@@ -71,7 +71,6 @@ public class InputManager : MonoBehaviour
         lmbAction = input.actions["lmb"];
         rmbAction = input.actions["rmb"];
         cursorAction = input.actions["cursor"];
-
     }
 
     public void SetCursorLock(bool locked)

@@ -3,11 +3,12 @@ using System;
 
 public enum GameState
 {
+    MainMenu,
+    Loading,
     Playing,
     Paused,
+    Cutscene,
     GameOver,
-    MainMenu,
-    Loading
 }
 
 public class GameManager : MonoBehaviour
@@ -53,12 +54,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SetGameState(GameState newState)
+    public void SetGameState(GameState newState)
     {
         CurrentState = newState;
-        Time.timeScale = (newState == GameState.Paused) ? 0f : 1f;
+
+        switch (newState)
+        {
+            case GameState.Paused:
+                Time.timeScale = 0;
+                break;
+            case GameState.Playing:
+                Time.timeScale = 1;
+                break;
+            case GameState.MainMenu:
+                break;
+            case GameState.Loading:
+                break;
+            case GameState.Cutscene:
+                break;
+            case GameState.GameOver:
+                break;
+            default:
+                Time.timeScale = 0;
+                break;
+        }
+
         OnGameStateChanged?.Invoke(newState);
     }
+
 
     // Other game state methods, scene loading, etc.
 }

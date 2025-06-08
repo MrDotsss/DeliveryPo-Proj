@@ -8,6 +8,7 @@ public class Quest
     public string id;
     public QuestData data;
     public bool finished = false;
+    public bool accepted = false;
 
     public Quest(QuestData data)
     {
@@ -16,16 +17,8 @@ public class Quest
     }
 }
 
-public class QuestManager : MonoBehaviour
+public class QuestManager : BaseManager<QuestManager>
 {
-    public static QuestManager Instance;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        else Instance = this;
-    }
-
     [SerializeField] private List<Quest> quests = new List<Quest>();
 
     public event Action<Quest> OnQuestAdded;
@@ -33,28 +26,57 @@ public class QuestManager : MonoBehaviour
     public event Action<Quest, Dictionary<string, object>> OnQuestUpdated;
     public event Action<Quest> OnQuestFinished;
 
-    public void AddQuest(Quest quest)
+    private void Start()
+    {
+        quests = SaveNLoadManager.Instance.LoadQuests();
+    }
+
+    public Quest AddQuest(Quest quest)
     {
         if (!quests.Contains(quest))
         {
             quests.Add(quest);
             OnQuestAdded?.Invoke(quest);
+            return quest;
         }
-        else Debug.LogError($"{quest.data.questTitle} duplicated with id: {quest.id}");
+        else
+        {
+            Debug.LogWarning($"{quest.data.questTitle} already exists with id: {quest.id}");
+            return quests.Find(item => item.data == quest.data);
+        }
     }
 
-    public void AddQuest(QuestData data)
+    public Quest AddQuest(QuestData data)
     {
-        Quest quest = new Quest(data);
+        Quest quest = quests.Find(item => item.data == data);
 
-        quests.Add(quest);
-        OnQuestAdded?.Invoke(quest);
+        if (quest != null)
+        {
+            Debug.LogWarning($"{data.questTitle} already exists with id: {quest.id}");
+            return quest;
+        }
+        else
+        {
+            quest = new Quest(data);
+
+            quests.Add(quest);
+            OnQuestAdded?.Invoke(quest);
+
+            return quest;
+        }
     }
 
     public void RemoveQuest(Quest quest)
     {
         quests.Remove(quest);
         OnQuestRemoved?.Invoke(quest);
+    }
+
+    public Quest GetQuest(QuestData data)
+    {
+        Quest quest = quests.Find(item => item.data == data);
+
+        return quest;
     }
 
     public void UpdateQuest(Quest quest, Dictionary<string, object> data)
@@ -78,16 +100,38 @@ public class QuestManager : MonoBehaviour
         }
 
         quest.finished = true;
+        SaveNLoadManager.Instance.MarkCheckpoint();
         OnQuestFinished?.Invoke(quest);
     }
 
     public List<Quest> GetActiveQuest(QuestType type = QuestType.None)
     {
+        if(type == QuestType.None)
+        {
+            return quests;
+        } else
+        {
+            List<Quest> activeQuests = new List<Quest>();
+
+            foreach (Quest quest in quests)
+            {
+                if (quest.data.questType == type)
+                {
+                    activeQuests.Add(quest);
+                }
+            }
+
+            return activeQuests;
+        }
+    }
+
+    public List<Quest> GetFinishedQuest(QuestType type = QuestType.None)
+    {
         List<Quest> activeQuests = new List<Quest>();
 
         foreach (Quest quest in quests)
         {
-            if (!quest.finished)
+            if (quest.finished)
             {
                 switch (type)
                 {
@@ -101,5 +145,10 @@ public class QuestManager : MonoBehaviour
         }
 
         return activeQuests;
+    }
+
+    public void ClearQuests()
+    {
+        quests.Clear();
     }
 }

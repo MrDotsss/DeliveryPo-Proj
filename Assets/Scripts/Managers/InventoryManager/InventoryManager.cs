@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [Serializable]
@@ -15,17 +17,19 @@ public class InventoryItem
     }
 }
 
-public class InventoryManager : MonoBehaviour
+[Serializable]
+public class InventoryData
 {
-    public static InventoryManager Instance;
+    public List<InventoryItem> items;
 
-    private void Awake()
+    public InventoryData(List<InventoryItem> items)
     {
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        else Instance = this;
+        this.items = items;
     }
+}
 
-    [SerializeField] private List<InventoryItem> parcels = new List<InventoryItem>();
+public class InventoryManager : BaseManager<InventoryManager>
+{
     [SerializeField] private List<InventoryItem> inventory = new List<InventoryItem>();
 
     public event Action<InventoryItem> ItemAdded;
@@ -35,59 +39,48 @@ public class InventoryManager : MonoBehaviour
 
     public InventoryItem CurrentItem { get; private set; }
 
-    public void AddItem(ItemData data, bool equip = false)
+    private void Start()
+    {
+        inventory = SaveNLoadManager.Instance.LoadInventory();
+    }
+  
+    public InventoryItem AddItem(InventoryItem item, bool equip = false)
+    {
+        if (inventory.Contains(item))
+        {
+            Debug.LogError($"{item.data.itemName} already exists with the same ID: {item.id}");
+            return item;
+        }
+
+        inventory.Add(item);
+        ItemAdded?.Invoke(item);
+        if(equip) EquipItem(item);
+
+        return item;
+    }
+
+    public InventoryItem AddItem(ItemData data, bool equip = false)
     {
         InventoryItem item = new InventoryItem(data);
 
-        if (data.itemType == ItemType.Parcel)
-        {
-            parcels.Add(item);
-            ItemAdded?.Invoke(item);
-        }
-        else
-        {
-            inventory.Add(item);
-            ItemAdded?.Invoke(item);
-        }
-
+        inventory.Add(item);
+        ItemAdded?.Invoke(item);
         if (equip) EquipItem(item);
-    }
 
-    public void AddItem(InventoryItem item, bool equip = false)
-    {
-
-        if (parcels.Contains(item) || inventory.Contains(item))
-        {
-            Debug.LogError($"{item.data.itemName} already existed with same id: {item.id}");
-            return;
-        }
-
-        if (item.data.itemType == ItemType.Parcel)
-        {
-            parcels.Add(item);
-            ItemAdded?.Invoke(item);
-        }
-        else
-        {
-            inventory.Add(item);
-            ItemAdded?.Invoke(item);
-        }
-
-        if (equip) EquipItem(item);
+        return item;
     }
 
     public void RemoveItem(InventoryItem item)
     {
-        if (parcels.Contains(item) || inventory.Contains(item))
-        {
-            if (item == CurrentItem) UnEquipItem();
-            ItemRemoved?.Invoke(item);
-        }
+        if (item == CurrentItem) UnEquipItem();
+
+        inventory.Remove(item);
+        ItemRemoved?.Invoke(item);
     }
 
     public void EquipItem(InventoryItem item)
     {
-        if (parcels.Contains(item) || inventory.Contains(item))
+        if (inventory.Contains(item))
         {
             CurrentItem = item;
             OnEquip?.Invoke(item);
@@ -96,26 +89,63 @@ public class InventoryManager : MonoBehaviour
 
     public void UnEquipItem()
     {
-        CurrentItem = null;
-        OnEquip?.Invoke(null);
+        if (CurrentItem != null)
+        {
+            CurrentItem = null;
+            OnEquip?.Invoke(null);
+        }
     }
 
     public void DropItem(InventoryItem item)
     {
-        if (parcels.Contains(item) || inventory.Contains(item))
+        if (inventory.Contains(item))
         {
-            CurrentItem = null;
+            RemoveItem(item);
+
             OnDrop?.Invoke(item);
         }
     }
 
-    public void ClearInventory()
+    public InventoryItem FindInventory(ItemData data)
     {
-        inventory.Clear();
+        foreach (InventoryItem item in inventory)
+        {
+            if (item.data == data) return item;
+        }
+
+        return null;
     }
 
-    public void ClearParcels()
+    public InventoryItem FindInventory(string itemName)
     {
-        parcels.Clear();
+        foreach (InventoryItem item in inventory)
+        {
+            if (item.data.itemName == itemName) return item;
+        }
+
+        return null;
+    }
+
+    public IEnumerable<InventoryItem> GetInventoryList()
+    {
+        return inventory.Where(item => item.data.itemType != ItemType.Parcel);
+    }
+
+    public IEnumerable<InventoryItem> GetParcelList()
+    {
+        return inventory.Where(item => item.data.itemType == ItemType.Parcel);
+    }
+
+    public IEnumerable<InventoryItem> GetAllInventoryList()
+    {
+        return inventory;
+    }
+
+    public void ClearInventory(ItemType type)
+    {
+        foreach (InventoryItem item in inventory)
+        {
+            if (item.data.itemType == type) inventory.Remove(item);
+        }
     }
 }

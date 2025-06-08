@@ -2,17 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class InputManager : MonoBehaviour
+public class InputManager : BaseManager<InputManager>
 {
-    public static InputManager Instance { get; private set; }
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        else Instance = this;
-
-    }
-
     [SerializeField] private PlayerInput input;
 
     #region InputAction Cache
@@ -26,6 +17,7 @@ public class InputManager : MonoBehaviour
     //triggers
     private InputAction interactAction;
     private InputAction phoneAction;
+    private InputAction scrollAction;
     private InputAction inventoryAction;
 
     private InputAction pauseAction;
@@ -42,6 +34,9 @@ public class InputManager : MonoBehaviour
     public bool MouseLocked {  get; private set; }
     public Vector2 Move => moveAction.ReadValue<Vector2>();
     public Vector2 Look => MouseLocked ? lookAction.ReadValue<Vector2>() : Vector2.zero;
+
+    public Vector2 Scroll => scrollAction.ReadValue<Vector2>();
+
     public bool Jump => jumpAction.WasPressedThisFrame();
     public bool Crouch => crouchAction.IsPressed();
     public bool Sprint => sprintAction.IsPressed();
@@ -53,15 +48,19 @@ public class InputManager : MonoBehaviour
     public event Action Pause;
     #endregion
 
-    private void Start()
+    public void Start()
     {
-        input = GetComponent<PlayerInput>();
-
         moveAction = input.actions["move"];
         lookAction = input.actions["look"];
         jumpAction = input.actions["jump"];
         crouchAction = input.actions["crouch"];
         sprintAction = input.actions["sprint"];
+
+        interactAction = input.actions["interact"];
+        inventoryAction = input.actions["inventory"];
+        phoneAction = input.actions["phone"];
+        scrollAction = input.actions["ui-scroll"];
+        pauseAction = input.actions["pause"];
 
         interactAction.performed += _ => Interact?.Invoke();
         inventoryAction.performed += _ => Inventory?.Invoke();
@@ -71,6 +70,8 @@ public class InputManager : MonoBehaviour
         lmbAction = input.actions["lmb"];
         rmbAction = input.actions["rmb"];
         cursorAction = input.actions["cursor"];
+
+        SetCursorLock(true);
     }
 
     public void SetCursorLock(bool locked)
@@ -79,5 +80,10 @@ public class InputManager : MonoBehaviour
 
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !locked;
+    }
+
+    public Vector2 GetMouseDelta()
+    {
+        return lookAction.ReadValue<Vector2>();
     }
 }

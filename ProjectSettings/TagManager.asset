@@ -5,11 +5,12 @@ TagManager:
   serializedVersion: 2
   tags:
   - PlayerCam
+  - Ground
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - Player
@@ -18,7 +19,7 @@ TagManager:
   - Hand
   - Capturable
   - Volumes
-  - 
+  - Triggers
   - 
   - 
   - 

@@ -13,7 +13,7 @@ public class DeliveryComponent : BaseNPCComponent
     public bool IsReceived { get; private set; }
     public Quest quest { get; private set; }
 
-    private void Start()
+    public override void Initialize()
     {
         quest = QuestManager.Instance.AddQuest(questData);
 
@@ -54,6 +54,10 @@ public class DeliveryComponent : BaseNPCComponent
             {
                 UIManager.Instance.SwitchPanel(UIManager.EUIPanels.Dialogue);
                 DialogueManager.Instance.StartDialogue(DialogueManager.Instance.GetDefault("PODFirst"));
+            } else
+            {
+                loop = false;
+                FinishComponent();
             }
 
             return;

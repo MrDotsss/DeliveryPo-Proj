@@ -147,6 +147,28 @@ public class QuestManager : BaseManager<QuestManager>
         return activeQuests;
     }
 
+    public List<Quest> GetUnfinishedQuest(QuestType type = QuestType.None)
+    {
+        List<Quest> activeQuests = new List<Quest>();
+
+        foreach (Quest quest in quests)
+        {
+            if (!quest.finished)
+            {
+                switch (type)
+                {
+                    case QuestType.Main: activeQuests.Add(quest); break;
+                    case QuestType.Delivery: activeQuests.Add(quest); break;
+                    case QuestType.Favor: activeQuests.Add(quest); break;
+                    default: activeQuests.Add((Quest)quest); break;
+                }
+
+            }
+        }
+
+        return activeQuests;
+    }
+
     public void ClearQuests()
     {
         quests.Clear();

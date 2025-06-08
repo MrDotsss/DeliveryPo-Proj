@@ -10,7 +10,7 @@ public class InputManager : BaseManager<InputManager>
     //player movement
     private InputAction moveAction;
     private InputAction lookAction;
-    private InputAction jumpAction;
+    public InputAction jumpAction { get; private set; }
     private InputAction crouchAction;
     private InputAction sprintAction;
 

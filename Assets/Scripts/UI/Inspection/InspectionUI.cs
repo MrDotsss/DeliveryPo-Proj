@@ -205,9 +205,12 @@ public class InspectionUI : UIState
     {
         DebugDrawer drawer = new DebugDrawer();
 
-        Transform origin = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().cam.transform;
+        if (GameObject.FindGameObjectWithTag("Player") != null)
+        {
+            Transform origin = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().cam.transform;
 
-        drawer.DrawRayCheck(origin.position, origin.forward, zoomIn, Color.blue);
+            drawer.DrawRayCheck(origin.position, origin.forward, zoomIn, Color.blue);
+        }
     }
 
     #endregion

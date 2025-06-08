@@ -25,6 +25,8 @@ public class ShrubQuestComponent : BaseQuestComponent
 
     protected override void CheckQuest()
     {
+        if (quest == null) return;
+
         List<InventoryItem> items = InventoryManager.Instance.GetAllInventoryList().ToList();
 
         foreach (InventoryItem item in items)

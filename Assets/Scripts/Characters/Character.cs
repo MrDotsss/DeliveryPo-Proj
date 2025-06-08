@@ -7,8 +7,6 @@ public abstract class Character : MonoBehaviour
     [Header("Base")]
     [SerializeField] protected CharacterController controller;
     [SerializeField] protected Animator animator;
-    [SerializeField] protected float baseHeight = 2;
-    [SerializeField] private float baseThickness = 0.8f;
     [SerializeField] private float groundCheckDistance = 0.3f;
     [SerializeField] private float ceilingCheckDistance = 0.3f;
     [SerializeField] private LayerMask groundMask;
@@ -23,12 +21,25 @@ public abstract class Character : MonoBehaviour
     public bool canInput = true;
     protected Vector3 velocity = Vector3.zero;
 
+    protected float originalHeight = 10f;
+
     public void PerformCheckers()
     {
-        IsOnFloor = Physics.SphereCast(transform.position, baseThickness, Vector3.down, out floorHit, baseHeight / 2 + groundCheckDistance, groundMask)
-          || Physics.Raycast(transform.position, Vector3.down, baseHeight / 2 + groundCheckDistance, groundMask);
-        IsOnCeiling = Physics.SphereCast(transform.position, baseThickness, Vector3.up, out ceilingHit, baseHeight / 2 + ceilingCheckDistance, groundMask)
-          || Physics.Raycast(transform.position, Vector3.up, baseHeight / 2 + ceilingCheckDistance, groundMask);
+        float radius = controller.radius;
+        float halfHeight = controller.height / 2f;
+
+        Vector3 bottom = transform.position + Vector3.down * (halfHeight - radius);
+        Vector3 top = transform.position + Vector3.up * (halfHeight - radius);
+
+        // Ground check
+        IsOnFloor =
+            Physics.SphereCast(bottom, radius, Vector3.down, out floorHit, groundCheckDistance, groundMask) ||
+            Physics.Raycast(bottom, Vector3.down, out floorHit, groundCheckDistance, groundMask);
+
+        // Ceiling check
+        IsOnCeiling =
+            Physics.SphereCast(top, radius, Vector3.up, out ceilingHit, ceilingCheckDistance, groundMask) ||
+            Physics.Raycast(top, Vector3.up, out ceilingHit, ceilingCheckDistance, groundMask);
     }
 
     public void Move()
@@ -71,10 +82,24 @@ public abstract class Character : MonoBehaviour
     #region Debugging
     private void OnDrawGizmosSelected()
     {
+        if (controller == null)
+            controller = GetComponent<CharacterController>();
+
+        if (controller == null)
+            return;
+
         DebugDrawer drawer = new DebugDrawer();
 
-        drawer.DrawRaySphereCheck(transform.position, Vector3.down, baseHeight + groundCheckDistance, baseThickness, Color.red);
-        drawer.DrawRaySphereCheck(transform.position, Vector2.up, baseHeight + ceilingCheckDistance, baseThickness, Color.red);
+        float radius = controller.radius;
+        float halfHeight = controller.height / 2f;
+        Vector3 bottom = transform.position + Vector3.down * (halfHeight - radius);
+        Vector3 top = transform.position + Vector3.up * (halfHeight - radius);
+
+        // Draw ground check
+        drawer.DrawRaySphereCheck(bottom, Vector3.down, groundCheckDistance, radius, Color.green);
+
+        // Draw ceiling check
+        drawer.DrawRaySphereCheck(top, Vector3.up, ceilingCheckDistance, radius, Color.cyan);
     }
     #endregion
 

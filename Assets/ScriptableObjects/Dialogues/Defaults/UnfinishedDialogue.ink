@@ -1,0 +1,1 @@
+You haven't finished all main quests. Can't go yet -> END

@@ -5,7 +5,7 @@ public class TalkingComponent : BaseNPCComponent
 {
     [SerializeField] private TextAsset dialogueAsset;
 
-    private void Start()
+    public override void Initialize()
     {
         if (dialogueAsset == null)
         {

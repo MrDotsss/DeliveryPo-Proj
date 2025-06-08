@@ -29,14 +29,17 @@ public abstract class BaseNPC : Character
         }
     }
 
-    protected virtual void Start()
+    private void Start()
     {
+        originalHeight = controller.height;
+
         NPCManager.Instance.RegisterNPC(this);
 
         foreach (BaseNPCComponent component in npcComponents)
         {
             component.SetOwner(this);
             componentQueue.Enqueue(component);
+            component.Initialize();
         }
     }
 

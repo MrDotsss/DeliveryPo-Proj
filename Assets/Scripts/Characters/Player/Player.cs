@@ -15,6 +15,7 @@ public class Player : Character
     public float walkSpeed = 10.0f;
     public float runSpeed = 15.0f;
     public float crouchSpeed = 5.0f;
+    public float crouchHeightFactor = 0.5f;
     public float jumpStrength = 10.0f;
 
     public float acceleration = 3.0f;
@@ -26,7 +27,7 @@ public class Player : Character
 
     private void Start()
     {
-        controller = GetComponent<CharacterController>();
+        originalHeight = controller.height;
         cam = GetComponentInChildren<FPSCamera>();
         Hand = GetComponentInChildren<PlayerHand>();
         StateMachine = gameObject.GetComponent<PlayerStateMachine>();
@@ -62,7 +63,7 @@ public class Player : Character
 
         float speed = new Vector2(velocity.x, velocity.z).magnitude;
         float tiltInput = InputManager.Instance.Move.x;
-        if (speed > 0.5f) cam.BobCamera(true, speed, 0.08f);
+        if (speed > 0.5f) cam.BobCamera(true, speed / 2, 0.08f);
         else cam.BobCamera(true, 1.5f, 0.05f);
 
         cam.TiltCamera(-tiltInput * 3f, 10f);
@@ -92,19 +93,29 @@ public class Player : Character
         crouchCoroutine = StartCoroutine(Crouching(isCrouch));
     }
 
-    private IEnumerator Crouching(bool crouch)
+    IEnumerator Crouching(bool crouch)
     {
-        float startingHeight = controller.height;
+        float crouchHeight = originalHeight * crouchHeightFactor; // Set this to something like 0.5f in your class
+
+        float startHeight = controller.height;
+        float targetHeight = crouch ? crouchHeight : originalHeight;
+
+        float startCenterY = controller.center.y;
+        float targetCenterY = startCenterY + (targetHeight - startHeight) / 2f;
 
         float t = 0f;
+
         while (t < 1f)
         {
             t += Time.deltaTime * crouchSpeed;
-            controller.height = Mathf.Lerp(startingHeight, (crouch ? baseHeight / 2 : baseHeight), t);
+
+            controller.height = Mathf.Lerp(startHeight, targetHeight, t);
+            //controller.center = new Vector3(0, Mathf.Lerp(startCenterY, targetCenterY, t), 0);
 
             yield return null;
         }
 
-        controller.height = crouch ? baseHeight / 2 : baseHeight;
+        controller.height = targetHeight;
+        //controller.center = new Vector3(0, targetCenterY, 0);
     }
 }

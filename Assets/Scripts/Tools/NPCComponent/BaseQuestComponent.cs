@@ -8,7 +8,7 @@ public abstract class BaseQuestComponent : BaseNPCComponent
     public QuestData data;
     protected Quest quest;
 
-    protected virtual void Start()
+    public override void Initialize()
     {
         quest = QuestManager.Instance.GetQuest(data);
 

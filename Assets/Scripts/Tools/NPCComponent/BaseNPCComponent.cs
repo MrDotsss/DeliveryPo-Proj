@@ -9,6 +9,8 @@ public abstract class BaseNPCComponent : MonoBehaviour
 
     public bool loop = false;
 
+    public abstract void Initialize();
+
     public abstract void Activate();
     protected void FinishComponent()
     {
@@ -20,5 +22,5 @@ public abstract class BaseNPCComponent : MonoBehaviour
     public void SetOwner(BaseNPC owner)
     {
         Owner = owner;
-    } 
+    }
 }

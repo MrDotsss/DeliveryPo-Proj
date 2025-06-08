@@ -5,37 +5,48 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+/// <summary>
+/// Controls the transition between day and night using volumetric effects and sky rotation.
+/// </summary>
 public class DayNightVolume : MonoBehaviour
 {
-    public Volume dayVolume;
-    public Volume nightVolume;
+    public Volume dayVolume;                // Volume profile for daytime
+    public Volume nightVolume;              // Volume profile for nighttime
     [Space]
-    public float transitionDuration = 5f;
-    public float skySpeed = 3f;
+    public float transitionDuration = 5f;  // Duration of day-night transition
+    public float skySpeed = 3f;             // Speed of sky rotation
 
-    private SkyVolume currentSky;
-    private Vector3 currentRotation = Vector3.zero;
+    private SkyVolume currentSky;           // Currently active sky volume
+    private Vector3 currentRotation = Vector3.zero;  // Current rotation of the sky
 
-    private Coroutine dayRoutine;
+    private Coroutine dayRoutine;           // Coroutine handling the transition
 
+    /// <summary>
+    /// Initialize by registering with GameManager and setting daytime active.
+    /// </summary>
     private void Start()
     {
         GameManager.Instance.dayNightVolume = this;
-
         SetDayTime(true);
     }
 
+    /// <summary>
+    /// Rotate the current sky every frame to simulate sky movement.
+    /// </summary>
     private void Update()
     {
         if (currentSky != null)
         {
             currentRotation += Vector3.up * skySpeed * Time.deltaTime;
-
             currentSky.skyRotation.overrideState = true;
             currentSky.skyRotation.value = currentRotation;
         }
     }
 
+    /// <summary>
+    /// Starts transitioning to day or night volumes.
+    /// </summary>
+    /// <param name="isDay">True for day, false for night.</param>
     public void SetDayTime(bool isDay = true)
     {
         if (dayRoutine != null)
@@ -57,6 +68,11 @@ public class DayNightVolume : MonoBehaviour
         dayRoutine = StartCoroutine(DayNightToggle(isDay));
     }
 
+    /// <summary>
+    /// Coroutine that smoothly blends between day and night volumes over transitionDuration.
+    /// </summary>
+    /// <param name="isDay">True if transitioning to day, false for night.</param>
+    /// <returns>IEnumerator for coroutine.</returns>
     private IEnumerator DayNightToggle(bool isDay)
     {
         float targetDayWeight = isDay ? 1f : 0f;

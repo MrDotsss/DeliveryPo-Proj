@@ -4,6 +4,9 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Represents an image with its filename, description, and texture data.
+/// </summary>
 public class ImageData
 {
     public string fileName;
@@ -18,11 +21,17 @@ public class ImageData
     }
 }
 
+/// <summary>
+/// Manager responsible for saving and loading player data, inventory, quests, NPC trust levels, and photos.
+/// </summary>
 public class SaveNLoadManager : BaseManager<SaveNLoadManager>
 {
     private string photoSavePath;
     private string photoDataPath;
 
+    /// <summary>
+    /// Initializes paths and creates directories if they don't exist.
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
@@ -37,14 +46,14 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
     }
 
     #region Wrappers
-    // Container class for JSON serialization of list
 
+    /// <summary>
+    /// Serializable class for storing player-related data for saving/loading.
+    /// </summary>
     [Serializable]
     private class PlayerData
     {
         public Vector3 position;
-
-        //Add more data to save if necessary
 
         public PlayerData(Vector3 position)
         {
@@ -52,16 +61,24 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         }
     }
 
+    /// <summary>
+    /// Container for a list of photo metadata, used for JSON serialization.
+    /// </summary>
     [Serializable]
     private class ImageMetaDataList
     {
         public List<ImageMetaData> photos = new List<ImageMetaData>();
     }
+
+    /// <summary>
+    /// Serializable metadata for a single photo.
+    /// </summary>
     [Serializable]
     public class ImageMetaData
     {
         public string fileName;
         public string description;
+
         public ImageMetaData(string fileName, string description)
         {
             this.fileName = fileName;
@@ -69,6 +86,9 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         }
     }
 
+    /// <summary>
+    /// Represents an entry of NPC trust data with NPC name and trust level.
+    /// </summary>
     [Serializable]
     public class NPCTrustEntry
     {
@@ -76,12 +96,18 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         public float trustLevel;
     }
 
+    /// <summary>
+    /// Serializable container for a list of NPC trust entries.
+    /// </summary>
     [Serializable]
     public class NPCTrustData
     {
         public List<NPCTrustEntry> entries = new List<NPCTrustEntry>();
     }
 
+    /// <summary>
+    /// Generic wrapper to serialize a list of items into JSON.
+    /// </summary>
     [Serializable]
     public class ListWrapper<T>
     {
@@ -94,6 +120,9 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
     }
     #endregion
 
+    /// <summary>
+    /// Saves the current game checkpoint including player, inventory, quests, and NPC trust levels.
+    /// </summary>
     public void MarkCheckpoint()
     {
         SavePlayer();
@@ -103,6 +132,11 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
     }
 
     #region Saving
+
+    /// <summary>
+    /// Saves a photo's texture as PNG and updates photo metadata JSON file.
+    /// </summary>
+    /// <param name="data">ImageData object containing texture and description.</param>
     public void SavePhoto(ImageData data)
     {
         // Save PNG texture
@@ -129,6 +163,9 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         File.WriteAllText(photoDataPath, json);
     }
 
+    /// <summary>
+    /// Saves the player's current inventory as JSON.
+    /// </summary>
     public void SaveInventory()
     {
         string path = Path.Combine(Application.persistentDataPath, "inventory.json");
@@ -141,6 +178,9 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         Debug.Log("Inventory Saved to: " + path);
     }
 
+    /// <summary>
+    /// Saves the currently active quests as JSON.
+    /// </summary>
     public void SaveQuest()
     {
         string path = Path.Combine(Application.persistentDataPath, "quest.json");
@@ -153,6 +193,9 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         Debug.Log("Quest Saved to: " + path);
     }
 
+    /// <summary>
+    /// Saves NPC trust levels as JSON data.
+    /// </summary>
     public void SaveTrustLevels()
     {
         NPCTrustData data = new NPCTrustData();
@@ -174,6 +217,9 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         Debug.Log("NPC trust levels saved to " + path);
     }
 
+    /// <summary>
+    /// Saves the player's current position.
+    /// </summary>
     public void SavePlayer()
     {
         Player player = GameManager.Instance.GetPlayer();
@@ -184,11 +230,15 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         string path = Path.Combine(Application.persistentDataPath, "player.json");
         File.WriteAllText(path, json);
         Debug.Log("Player location saved to " + path);
-
     }
     #endregion
 
     #region Loading
+
+    /// <summary>
+    /// Loads photo textures and their metadata from disk.
+    /// </summary>
+    /// <returns>List of loaded ImageData objects.</returns>
     public List<ImageData> LoadPhotoData()
     {
         List<ImageData> photos = new List<ImageData>();
@@ -216,6 +266,10 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         return photos;
     }
 
+    /// <summary>
+    /// Loads the player's saved inventory from JSON file.
+    /// </summary>
+    /// <returns>List of InventoryItem loaded from disk.</returns>
     public List<InventoryItem> LoadInventory()
     {
         string path = Path.Combine(Application.persistentDataPath, "inventory.json");
@@ -234,6 +288,10 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         }
     }
 
+    /// <summary>
+    /// Loads active quests from JSON save file.
+    /// </summary>
+    /// <returns>List of Quest objects loaded from disk.</returns>
     public List<Quest> LoadQuests()
     {
         string path = Path.Combine(Application.persistentDataPath, "quest.json");
@@ -242,16 +300,20 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         {
             string json = File.ReadAllText(path);
             ListWrapper<Quest> wrapper = JsonUtility.FromJson<ListWrapper<Quest>>(json);
-            Debug.Log("Inventory Loaded");
+            Debug.Log("Quest Loaded");
             return wrapper.items;
         }
         else
         {
-            Debug.LogWarning("Inventory Save file not found!");
+            Debug.LogWarning("Quest Save file not found!");
             return new List<Quest>();
         }
     }
 
+    /// <summary>
+    /// Loads NPC trust levels from JSON save file.
+    /// </summary>
+    /// <returns>Dictionary mapping NPC names to trust levels.</returns>
     public Dictionary<string, float> LoadTrustLevels()
     {
         string path = Path.Combine(Application.persistentDataPath, "npc_trust.json");
@@ -275,27 +337,34 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
         return trustLevels;
     }
 
+    /// <summary>
+    /// Loads the player's saved position from disk.
+    /// </summary>
+    /// <returns>Vector3 position loaded from save file, or current player position if no save found.</returns>
     public Vector3 LoadPlayer()
     {
         Player player = GameManager.Instance.GetPlayer();
 
         string path = Path.Combine(Application.persistentDataPath, "player.json");
 
-        if(File.Exists(path))
+        if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
             PlayerData data = JsonUtility.FromJson<PlayerData>(json);
             Debug.Log("Player Loaded");
             return data.position;
-        } else
+        }
+        else
         {
-            Debug.LogWarning("Trust level file not found.");
+            Debug.LogWarning("Player save file not found.");
             return player.transform.position;
         }
-
     }
 
-    // Helper to load metadata list from JSON or create new empty one
+    /// <summary>
+    /// Helper method to load photo metadata list from JSON file or create a new empty list if none exists.
+    /// </summary>
+    /// <returns>ImageMetaDataList instance loaded from file or new empty list.</returns>
     private ImageMetaDataList LoadMetaDataList()
     {
         if (File.Exists(photoDataPath))
@@ -307,6 +376,9 @@ public class SaveNLoadManager : BaseManager<SaveNLoadManager>
     }
     #endregion
 
+    /// <summary>
+    /// Deletes all saved data in the persistent data path directory.
+    /// </summary>
     public void DeleteAllSaveData()
     {
         string path = Application.persistentDataPath;

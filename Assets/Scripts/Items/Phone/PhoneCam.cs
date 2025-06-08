@@ -2,31 +2,40 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+/// <summary>
+/// PhoneCam handles a simulated phone camera functionality, 
+/// allowing zooming, aiming, and capturing images.
+/// </summary>
 public class PhoneCam : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Image camBorder;
+    [SerializeField] private Image camBorder; // UI border to indicate capture status
+
     [Header("Zooming")]
-    [SerializeField] private Camera phoneCam;
-    [SerializeField] private float zoomIn = 30;
-    [SerializeField] private float zoomOut = 80;
+    [SerializeField] private Camera phoneCam; // Camera used for capturing images
+    [SerializeField] private float zoomIn = 30; // Minimum zoom level
+    [SerializeField] private float zoomOut = 80; // Maximum zoom level
+
     [Header("Aiming")]
-    [SerializeField] private float aimDistance = 100f;
-    [SerializeField] private LayerMask aimMask;
-    [SerializeField] private Vector3 aimPosition;
-    [SerializeField] private Quaternion aimRotation;
+    [SerializeField] private float aimDistance = 100f; // Maximum aiming distance
+    [SerializeField] private LayerMask aimMask; // Layer mask for aiming at specific objects
+    [SerializeField] private Vector3 aimPosition; // Desired position while aiming
+    [SerializeField] private Quaternion aimRotation; // Desired rotation while aiming
     [Space]
-    [SerializeField] private float aimSpeed = 12f;
+    [SerializeField] private float aimSpeed = 12f; // Speed of aim transition
 
-    private Vector3 defaultPosition;
-    private Quaternion defaultRotation;
+    private Vector3 defaultPosition; // Stores the default position of the phone cam
+    private Quaternion defaultRotation; // Stores the default rotation of the phone cam
 
-    private InputAction rmbAction;
-    private InputAction lmbAction;
-    private Vector2 zoom;
+    private InputAction rmbAction; // Right mouse button input action for aiming
+    private InputAction lmbAction; // Left mouse button input action for capturing
+    private Vector2 zoom; // Stores scroll wheel input for zooming
 
-    private RaycastHit hitInfo;
+    private RaycastHit hitInfo; // Stores information about raycast collisions
 
+    /// <summary>
+    /// Initializes default values and input actions.
+    /// </summary>
     private void Start()
     {
         defaultPosition = transform.localPosition;
@@ -42,28 +51,45 @@ public class PhoneCam : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Called when the PhoneCam is enabled.
+    /// Unequips the current inventory item and subscribes to inventory events.
+    /// </summary>
     private void OnEnable()
     {
         InventoryManager.Instance.UnEquipItem();
         InventoryManager.Instance.OnEquip += DisablePhone;
     }
 
+    /// <summary>
+    /// Called when the PhoneCam is disabled.
+    /// Re-equips the current inventory item and unsubscribes from inventory events.
+    /// </summary>
     private void OnDisable()
     {
         InventoryManager.Instance.EquipItem(InventoryManager.Instance.CurrentItem);
         InventoryManager.Instance.OnEquip -= DisablePhone;
     }
 
+    /// <summary>
+    /// Disables the phone camera.
+    /// </summary>
     public void DisablePhone(InventoryItem item = null)
     {
         gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Enables the phone camera.
+    /// </summary>
     public void EnablePhone()
     {
         gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// Handles aiming, zooming, and updating the UI.
+    /// </summary>
     private void Update()
     {
         if (rmbAction.IsPressed())
@@ -81,8 +107,8 @@ public class PhoneCam : MonoBehaviour
             transform.localRotation = Quaternion.Lerp(transform.localRotation, defaultRotation, aimSpeed * Time.deltaTime);
         }
 
+        // Handle camera zoom based on mouse scroll input
         zoom = InputManager.Instance.Scroll;
-
         if (zoom.magnitude != 0)
         {
             phoneCam.fieldOfView -= (zoom.y * 0.1f);
@@ -90,39 +116,39 @@ public class PhoneCam : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks if the player is capturing an object and handles UI feedback.
+    /// </summary>
     private void CheckOnCapture()
     {
         if (Physics.Raycast(transform.position, transform.forward, out hitInfo, aimDistance, aimMask))
         {
             if (hitInfo.transform.TryGetComponent(out CaptureBox capture))
             {
-                if (hitInfo.distance < capture.minDistance || hitInfo.distance > capture.maxDistance)
+                // Provide feedback based on the capture distance.
+                camBorder.color = (hitInfo.distance < capture.minDistance || hitInfo.distance > capture.maxDistance) ? Color.red : Color.green;
+
+                if (lmbAction.WasPressedThisFrame())
                 {
-                    camBorder.color = Color.red;
-                }
-                else
-                {
-                    camBorder.color = Color.green;
+                    capture.Capture();
 
-                    if (lmbAction.WasPressedThisFrame())
-                    {
-                        capture.Capture();
+                    Texture2D snapShot = CaptureSnapshot();
+                    Texture2D landscape = RotateTexture(snapShot);
 
-                        Texture2D snapShot = CaptureSnapshot();
-                        Texture2D landscape = RotateTexture(snapShot);
-
-                        ImageData data = new ImageData(capture.fileName, capture.description, landscape);
-
-                        SaveNLoadManager.Instance.SavePhoto(data);
-                    }
+                    ImageData data = new ImageData(capture.fileName, capture.description, landscape);
+                    SaveNLoadManager.Instance.SavePhoto(data);
                 }
             }
-        }else
+        }
+        else
         {
             camBorder.color = Color.black;
         }
     }
 
+    /// <summary>
+    /// Captures an image from the phone camera and applies gamma correction.
+    /// </summary>
     private Texture2D CaptureSnapshot()
     {
         RenderTexture activeRenderTexture = RenderTexture.active;
@@ -134,17 +160,19 @@ public class PhoneCam : MonoBehaviour
 
         RenderTexture.active = activeRenderTexture;
 
-        // Apply gamma correction manually
         ApplyGammaCorrection(capturedTexture);
 
         return capturedTexture;
     }
 
+    /// <summary>
+    /// Rotates the captured texture to match the expected orientation.
+    /// </summary>
     private Texture2D RotateTexture(Texture2D texture)
     {
         int width = texture.width;
         int height = texture.height;
-        Texture2D rotatedTexture = new Texture2D(height, width); // Swap width & height
+        Texture2D rotatedTexture = new Texture2D(height, width);
 
         Color32[] originalPixels = texture.GetPixels32();
         Color32[] rotatedPixels = new Color32[originalPixels.Length];
@@ -162,6 +190,9 @@ public class PhoneCam : MonoBehaviour
         return rotatedTexture;
     }
 
+    /// <summary>
+    /// Applies gamma correction to the captured texture.
+    /// </summary>
     private void ApplyGammaCorrection(Texture2D texture)
     {
         Color32[] pixels = texture.GetPixels32();
@@ -177,6 +208,4 @@ public class PhoneCam : MonoBehaviour
         texture.SetPixels32(pixels);
         texture.Apply();
     }
-
-
 }
